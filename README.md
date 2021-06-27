@@ -1,5 +1,5 @@
 # Data Science Portfolio
-This repository contains data science projects published in the form of iPython Notebooks.
+This repository contains data science projects published in the form of iPython / R Notebooks.
 
 _Note: Data can be accessed under data directory._
 
