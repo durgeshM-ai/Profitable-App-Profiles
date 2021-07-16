@@ -1,0 +1,315 @@
+---
+title: "**Market Basket Analysis in R**"
+author: "Durgesh Mishra"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    theme: united
+    highlight: tango
+    df_print: paged
+    code_folding: hide
+---
+
+<center><img
+src="https://i.imgur.com/Opyn1vo.png"></center>
+
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction {.tabset .tabset-fade .tabset-pills}
+
+## Problem Statement {.tabset .tabset-fade}
+
+Market Basket Analysis is a method used by large retailers to discover product correlations. Purchase behavior can be well determined through constant checks on items that frequently appear together in transactions.
+
+
+## Adressing the Problem Statement {.tabset .tabset-fade}
+
+- Algorithm:
+**Apriori algorithm** helps in conducting this kind of analysis. It generates association rules that imply if an item X occurs, then item Y also occurs with a certain probability. 
+
+More about association rules and related terminologies can be found [here](https://en.wikipedia.org/wiki/Association_rule_learning).
+
+- Data:
+The dataset can be accessed from [here](https://www.kaggle.com/sulmansarwar/transactions-from-a-bakery).
+
+
+## Proposed Approach {.tabset .tabset-fade}
+
+Since the itemsets need to be built as individual objects of transaction type, Apriori algorithm approach is the correct way to go about this problem.
+
+
+## Benefits {.tabset .tabset-fade}
+
+The algorithm helps in mining frequent itemsets that are necessary to be able to produce relevant association rules between products. The users of this analysis, i.e. retail companies will henceforth be able to apply the outputs in the following situation:
+
+
+1. Where should an item be placed in a store to maximize sales?
+2. Which items are frequently bought together?
+3. Does brand of an item make a difference when bought with another item?
+4. How does demographics affect the purchase behavior of customers?
+
+
+# Packages Required {.tabset .tabset-fade .tabset-pills}
+
+## Load Packages upfront {.tabset .tabset-fade}
+
+All the packages are loaded upfront to provide replication convenience to the readers.
+
+```{r, warning=FALSE, message=FALSE}
+
+# Load libraries
+library(tidyverse) 
+library(lubridate) 
+library(arules) 
+library(arulesViz)
+```
+
+
+## Messages / Warnings
+
+All messages and warnings have been suppressed from package loading activity.
+
+
+## Purpose of Packages
+
+
+- `tidyverse`: It is used for data manipulation
+- `arules`: mine frequent itemsets and association rules and also generate transaction objects
+- `arulesViz`: visualize the association rules that have been generated
+- `knitr`: generate dynamic reports
+- `gridExra`: provides a list of user-level functions for "grid" based graphic creation
+- `lubridate`: operate with times and dates
+
+
+# Data Preparation {.tabset .tabset-fade .tabset-pills}
+
+## Original Source
+
+The dataset was originally sourced from [here](https://github.com/garystafford/pyspark-setup-demo/blob/master/work/BreadBasket_DMS.csv)
+
+
+## Data description {.tabset .tabset-fade}
+
+The `read.transactions()` command reads the transaction csv data file from the url and creates a `>transactions` object.
+
+```{r, warning=FALSE, message=FALSE}
+# read csv file
+data <- read.csv("C:/Users/Center/Downloads/archive (1)/BreadBasket_DMS.csv", stringsAsFactors = TRUE)
+```
+
+```{r, warning=FALSE, message=FALSE}
+# check dataset structure for datatype
+str(data)
+```
+
+The dataset contains real-world transaction data from a local grocery outlet. There are 6614 transactions and 104 items aggregated into categories.
+
+1. Date
+2. Time
+3. Transaction
+4. Item
+ 
+
+The original sourcing of dataset was done to develop association rule package `arules` which provides a basic infrastructure for creating and manipulating inputs datasets and for analyzing the resulting itemsets and rules.
+
+The dataset helped in the development of the following:
+
+1. Apriori algorithm
+2. Eclat algorithm
+
+Both these algorithms are used to mine frequent itemsets, maximal frequent itemsets, closed frequent itemsets and association rules.
+
+
+## Data Assessment
+
+The data was imported in `data` variable through `read.csv()` syntax. 
+
+* `Date`. Character variable for the transactions date (YYYY-MM-DD format). The column includes dates from 29/10/2016 to 08/04/2017.
+
+* `Time`. Character variable that tells us the time of the transactions (HH:MM:SS format).
+
+* `Transaction`. Quantitative variable that allows us to differentiate the transactions. The rows that share the same value in this field belong to the same transaction, that's why the data set has less transactions than observations. 
+
+* `Item`. Character variable containing the products.
+
+Looking at the summary, we notice that the Date and Time columns are of string datatype which calls for data type conversion.
+
+```{r, warning=FALSE, message=FALSE}
+# present dataset 5 point summary
+summary(data)
+cat('\n')
+
+# check for any NA values column-wise
+colSums(is.na(data))
+```
+Even though there are no NULL values in the dataset, the Item sets contain NONE as a value which probably is because of measurement errors. Thus, the rows are dropped since it is insignificantly small when compared to the size of the actual itemsets. Also, the name of the `Transaction` is modified to `TransactionID` for operations.
+
+```{r, warning=FALSE, message=FALSE}
+# simplify column names
+colnames(data) <- c('date', 'time', 'transactionID', 'item')
+
+# change date and hour datatypes
+data <- data %>% mutate(date = as.Date(date), time = hms(time))
+
+# Drop NONE values
+data$item[data$item == "NONE"] <- NA
+data <- data %>% drop_na()
+summary(data)
+
+# Calculate the difference in time between the dataset start and end dates
+cat('\n')
+difftime(data$date[nrow(data)], data$date[1])
+```
+
+## Final Dataset
+
+Here's the final cleaned dataset:
+
+```{r, warning=FALSE, message=FALSE}
+# provide overview of the cleaned dataset
+head(data)
+```
+
+
+## Summary Information
+
+Numerical summary is presented through 5 point summary statistics which suggests the following:
+
+
+1. The entire dataset is collected for 161 days
+2. Most sales happen at 12.45 pm in the afternoon
+3. Coffee is the most ordered item!
+
+
+# Proposed Exploratory Data Analysis {.tabset .tabset-fade .tabset-pills}
+
+## Uncovering new information {.tabset .tabset-fade}
+
+The data can be sliced and mutated to obtain relevant information through visualizations. `dplyr` package can help with data manipulation to provide useful insights through curated dataset. New variables are used to store the manipulated dataframes which are further used to create visualizations.
+
+## Plots and Tables {.tabset .tabset-fade}
+
+Histograms and Barcharts (horizontal and vertical) will be useful in representing most of the data as shown in the upcoming tabs.
+
+### Item Frequency
+
+To observe new information, we group the dataset based on variables and summarize the count of items. One such infomation is about the frequency of items across the transactionIDs. 
+
+```{r, warning=FALSE, message=FALSE}
+# prepare visualization for identifying item frequency
+viz1 <- data %>%
+  group_by(item) %>%
+  summarize(Count = n()) %>%
+  arrange(desc(Count)) %>%
+  slice(1:10) %>%
+  ggplot(aes(x = reorder(item, Count), y = Count, fill = item)) + 
+  geom_bar(stat = 'identity') + 
+  coord_flip() + 
+  ggtitle('Most popular line items') + 
+  theme(legend.position = "none")
+
+viz1
+```
+
+
+**The top 10 Items based on counts in the transaction items where coffee is very high in demand.**
+
+
+### Sales over time
+
+
+Further, to understand the sales over time for the items, the dataset is grouped by `date` and mutated to represent count of items summarized over the dates across the entire dataset.
+
+```{r, warning=FALSE, message=FALSE}
+# prepare dataset for presenting sales over time
+viz2 <- data %>%
+  group_by(date) %>%
+  summarise(Count = n()) %>%
+  mutate(Day = wday(date, label = T)) %>% 
+  ggplot(aes(x = date, y = Count, fill = Day)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Line items sold per day")
+viz2
+```
+
+
+**Saturday is the biggest sales day followed by Sunday with the maximum line items being sold in February.**
+
+### Total Unique transactions per weekday
+
+We can also calculate the Total unique transactions per weekday to establish the days of highest and lowest unique orders.
+
+
+```{r, warning=FALSE, message=FALSE}
+# calculate items
+items <- data %>%
+  mutate(Day = wday(date, label = T)) %>%
+  group_by(Day) %>%
+  summarise(Count = n())
+
+# calculate unique_transaction counts
+unique_transactions <- data %>%
+  mutate(wday = wday(date, label = T)) %>%
+  group_by(wday, transactionID) %>%
+  summarise(n_distinct(transactionID)) %>%
+  summarise(Count = n())
+
+# calculate the overall dataset containing Items / transaction
+overall <- data.frame(items, unique_transactions[2], items[2] / unique_transactions[2])
+colnames(overall) <- c("Day", "Line", "Unique", "Items.Trans")
+
+# perform visualization for the overall dataset
+ggplot(overall, aes(x = Day, y = Items.Trans, fill = Day)) +
+  geom_bar(stat = "identity") +
+  ggtitle("Total unique transactions per weekday") +
+  theme(legend.position = "none") +
+  geom_text(aes(label = round(Items.Trans, 1)), vjust = 2)
+```
+
+
+**Highest number of items per transaction ID indicates more sale on Sundays!**
+
+### Hourly Sales
+
+```{r, warning = FALSE, message=FALSE}
+viz1 <- data %>% 
+  mutate(Hour = as.factor(hour(time)))%>% 
+  group_by(Hour) %>% 
+  summarise(Count= n()) 
+
+viz2 <- data %>% 
+  mutate(Hour = as.factor(hour(time)))%>% 
+  group_by(Hour, transactionID) %>% 
+  summarise(n_distinct(transactionID)) %>% 
+  summarise(Count=n())
+
+generic_viz <- data.frame(viz1, viz2[2], viz1[2]/viz2[2])  # items per unique transaction
+colnames(generic_viz) <- c("Hour", "Line", "Unique", "Items.Trans")
+
+viz4 <- 
+  ggplot(generic_viz,aes(x = Hour, y = Items.Trans, fill = Hour)) +
+  geom_bar(stat ="identity") +
+  ggtitle("Total items per transaction per hour") +
+  theme(legend.position = "none") +
+  geom_text(aes(label = round(Items.Trans, 1)), vjust = 2)
+viz4
+```
+
+
+**The most items per transaction is made by people between 10am and 5pm with 2 pm as peak time**
+
+
+## Something that I wish to learn {.tabset .tabset-fade}
+
+I wish to learn how to use **Apriori algorithm** to perform Market Basket Analysis. Using the R-documentation for `arules` and `arulesViz` libraries, I will be able to learn details on the algorithm.
+
+
+## Plans of including Machine Learning {.tabset .tabset-fade}
+
+Yes, I plan to use **Association Rules Mining through Apriori algorithm** for frequent itemset mining.
