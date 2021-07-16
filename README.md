@@ -7,7 +7,7 @@ _Note: Data can be accessed under data directory._
 
 ## Projects
 - ### Association Rule Mining
-	- [Market Basket Analysis](): Market Basket Analysis is a method used by large retailers to discover product correlations. Purchase behavior can be well determined through constant checks on items that frequently appear together in transactions.
+	- [Market Basket Analysis](): Market Basket Analysis is a method used by large retailers to discover product correlations. Purchase behavior can be well determined through constant checks on items that frequently appear together in transactions. Dataset: [Link](https://github.com/durgeshM-ai/Data-Science-Projects/blob/master/datasets/BreadBasket_DMS.csv)
 
 - ### Classification
 	- [Rotor temperature detection in Permanent Magnet Synchronous Motors](https://github.com/durgeshM-ai/Data-Science-Projects/blob/master/python_notebooks/Detecting%20Parkinson's%20disease.ipynb): Predict presence of Parkinson's disease in a person using XGBoost. Dataset: [UCI Repository](https://archive.ics.uci.edu/ml/datasets/Parkinsons)
