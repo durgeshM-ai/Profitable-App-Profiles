@@ -12,7 +12,6 @@ _Note: Data can be accessed under data directory._
 - ### Classification
 	- [Rotor temperature detection in Permanent Magnet Synchronous Motors](https://github.com/durgeshM-ai/Data-Science-Projects/blob/master/python_notebooks/Detecting%20Parkinson's%20disease.ipynb): Predict presence of Parkinson's disease in a person using XGBoost. Dataset: [UCI Repository](https://archive.ics.uci.edu/ml/datasets/Parkinsons)
 	- [Detecting Parkinson's Disease](https://github.com/durgeshM-ai/Data-Science-Projects/blob/master/python_notebooks/Detecting%20Parkinson's%20disease.ipynb): Predict presence of Parkinson's disease in a person using XGBoost. Dataset: [UCI Repository](https://archive.ics.uci.edu/ml/datasets/Parkinsons)
-	- [Predicting Heart Attack](https://github.com/durgeshM-ai/Data-Science-Projects/blob/master/r-code/Predicting%20Heart%20Attack.Rmd): Random Forest and Logistic Regression models were developed based on the feature importance determined by Exploratory Data Analysis and Principal Component Analysis with the former model scoring a 91% accuracy in predicting heart attacks. Dataset: [UCI Repository](https://archive.ics.uci.edu/ml/datasets/Heart+Disease)
 	- [Customer Churn in Telecom](https://github.com/durgeshM-ai/Data-Science-Projects/blob/master/python_notebooks/EDA.pandas%20-%20customer%20churn.ipynb): Perform exploratory data analysis on customer churn dataset in telecom through pandas. Dataset: [Link](https://github.com/durgeshM-ai/Data-Science-Projects/blob/master/datasets/telecom_churn_csv.csv)
 	
 - ### Recommendation System
